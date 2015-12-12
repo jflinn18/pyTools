@@ -15,11 +15,14 @@ import ourDB
 #HOST = raw_input("Enter server IP: " )
 PORT = 12345
 
-def addData(mySock, ip, data):
+def addData(ip, data):
 	try:
+		mySock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		socket.setdefaulttimeout(None)
 		mySock.connect((ip, PORT))
 	except:
 		print 'Connection failed.'
+		return
 		
 		
 	print "Connection Complete"
@@ -38,7 +41,7 @@ def addData(mySock, ip, data):
 		print 'Incorrect Server response! Next server...'
 		return
 		
-		
+	#pdb.set_trace()	
 	msg = mySock.recv(1024)
 	print msg
 
@@ -50,7 +53,6 @@ def addData(mySock, ip, data):
 
 #pdb.set_trace()
 #socket.setdefaulttimeout(None)
-mySock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 netSize = len(portscan.openIPs)
 
@@ -59,10 +61,29 @@ netSize = len(portscan.openIPs)
 R = 2
 
 for n in ourDB.db:
-	while n[2] <= R:
+	while n[2] < R:
+		#pdb.set_trace()
 		ip = portscan.openIPs[random.randint(0, netSize-1)]
 		if ip not in n[3]:
 			n[3].append(ip)
-			n[2] += n[2]
+			n[2] = n[2] + 1
 			
-			addData(mySock, ip, (n[0], n[1]))
+			addData(ip, (n[0], n[1]))
+
+
+			
+for ip in portscan.openIPs:
+	try:
+		conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		conn.connect((ip, PORT))
+	except:
+		print 'Connection failed.'
+		
+	print "Connection Complete"
+	
+	conn.send(portscan.myIP)
+	msg = conn.recv(256)
+	if msg == "hello: " + portscan.myIP:
+		conn.send("finished")
+		
+	conn.close()

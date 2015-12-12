@@ -24,8 +24,8 @@ serverIPs = []
 #counter = 2;
 #while counter < 256:
 
-counter = 15
-while counter < 24:
+counter = 2
+while counter < 256:
     #make a bunch of ip addresses
     newServerIP = remoteServer + `counter`
     serverIPs.append(newServerIP)
