@@ -22,11 +22,13 @@ conn.close()
 #pdb.set_trace()
 conn, addr = s.accept()
 print 'Connected by', addr
+
 while 1:
     data = conn.recv(128)
     conn.send("hello: " + data)
     #data is the SQL statement
     data = conn.recv(1024)
+    if data is "finished": break
     localDatabase = sqlite3.connect('localDB.db')
     cursor = localDatabase.cursor()
 
@@ -37,7 +39,6 @@ while 1:
     localDatabase.commit()
     localDatabase.close()
     conn.sendall("Got it.")
-    if data: break
 conn.close()
 
 #close the socket
