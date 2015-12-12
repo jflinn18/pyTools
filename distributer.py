@@ -58,7 +58,8 @@ netSize = len(portscan.openIPs)
 
 # assuming a 33.3% disconnection rate (see paper)
 
-R = 2
+#R = 2
+R = 1
 
 for n in ourDB.db:
 	while n[2] < R:
