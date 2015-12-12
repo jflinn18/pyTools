@@ -65,9 +65,9 @@ localDatabase.close()
 s.close()
 
 #check if database exists already --> if it does, delete it
-if(os.path.exists("release\localDB.db")):
-    os.system("del release\localDB.db")
+#if(os.path.exists("release\localDB.db")):
+#    os.system("del release\localDB.db")
 #move the database file to the folder where the P2PNetworkFinal.exe is located
-os.rename("localDB.db", "release\localDB.db")
+#os.rename("localDB.db", "release\localDB.db")
 #run the P2PNetworkFinal.exe
-os.system("release\P2PNetworkFinal.exe")
+#os.system("release\P2PNetworkFinal.exe")
