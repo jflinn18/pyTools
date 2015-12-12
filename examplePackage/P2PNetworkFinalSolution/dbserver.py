@@ -3,9 +3,19 @@ import socket
 import sqlite3
 import os
 import pdb
+import sys
 
 HOST = ''                 # Symbolic name meaning all available interfaces
 PORT = 12345              # Arbitrary non-privileged port
+
+
+#class to allow exiting the connection
+class exitConn(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
+#end exitConn
 
 print "Starting server. Please wait."
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -13,34 +23,44 @@ s.bind((HOST, PORT))
 s.listen(1)
 conn, addr = s.accept()
 while 1:
-    msg = conn.recv(128)
-    conn.sendall("hello: "+ msg)
-    if msg: break;
+    try:
+        msg = conn.recv(128)
+        conn.sendall("hello: "+ msg)
+        if msg: break;
+    except KeyboardInterrupt:
+        sys.exit()
 conn.close()
 
-
-#pdb.set_trace()
-conn, addr = s.accept()
-print 'Connected by', addr
+localDatabase = sqlite3.connect('localDB.db')
+cursor = localDatabase.cursor()
+cursor.execute("drop table if exists DATA")
+#remove the current data table if it already exists
+cursor.execute("create table DATA(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, NAME TEXT NOT NULL, AGE INT NOT NULL)")
 
 while 1:
-    data = conn.recv(128)
-    conn.send("hello: " + data)
-    #data is the SQL statement
-    data = conn.recv(1024)
-    if data is "finished": break
-    localDatabase = sqlite3.connect('localDB.db')
-    cursor = localDatabase.cursor()
+    try:
+        conn, addr = s.accept()
+        print 'Connected by', addr
+        data = conn.recv(128)
+        conn.send("hello: " + data)
+        #data is the SQL statement
+        data = conn.recv(1024)
+        print data
+        if data == "finished":
+            break
+        #pdb.set_trace()
+        conn.sendall("Got it.")
+        conn.close()
+        cursor.execute(data)
+        localDatabase.commit()
+    except KeyboardInterrupt:
+        sys.exit()
+    #except exitConn:
+    #    print "Data transfer finished"
+    #    break;
 
-    #remove the current data table if it already exists
-    cursor.execute("drop table if exists DATA")
-    cursor.execute("create table DATA(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, NAME TEXT NOT NULL, AGE INT NOT NULL)")
-    cursor.execute(data)
-    localDatabase.commit()
-    localDatabase.close()
-    conn.sendall("Got it.")
-conn.close()
-
+#close the database
+localDatabase.close()
 #close the socket
 s.close()
 
